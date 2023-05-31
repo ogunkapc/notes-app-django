@@ -1,10 +1,11 @@
 import 'dart:convert';
 
+import 'package:notes_app/create.dart';
+import 'package:notes_app/note.dart';
+import 'package:notes_app/urls.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
-import 'package:notes_app/note.dart';
-import 'package:notes_app/urls.dart';
 
 void main() {
   runApp(const MyApp());
@@ -18,6 +19,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Django Demo',
+      darkTheme: ThemeData.dark(
+        useMaterial3: true,
+      ),
       theme: ThemeData(
         // primarySwatch: Colors.blue,
         useMaterial3: true,
@@ -49,16 +53,16 @@ class _MyHomePageState extends State<MyHomePage> {
   _retrieveNotes() async {
     notes = [];
 
-    final response = await client.get(Uri.parse(retrieveUrl));
-    List responseData = jsonDecode(response.body);
-    for (var element in responseData) {
+    // final response = await client.get(retrieveUrl);
+    List response = jsonDecode((await client.get(retrieveNotesUrl)).body);
+    for (var element in response) {
       notes.add(Note.fromMap(element));
     }
     setState(() {});
   }
 
   void _deleteNote(int id) {
-    client.delete(Uri.parse(deleteUrl(id)));
+    client.delete(deleteUrl(id));
     _retrieveNotes();
   }
 
@@ -67,6 +71,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
+        centerTitle: true,
       ),
       body: RefreshIndicator(
         onRefresh: () async {
@@ -75,20 +80,29 @@ class _MyHomePageState extends State<MyHomePage> {
         child: ListView.builder(
           itemCount: notes.length,
           itemBuilder: (BuildContext context, int index) {
-            return ListTile(
-              title: Text(notes[index].note),
-              onTap: () {},
-              trailing: IconButton(
-                  onPressed: () {
-                    _deleteNote(notes[index].id);
-                  },
-                  icon: const Icon(Icons.delete)),
+            return Card(
+              child: ListTile(
+                title: Text(notes[index].note),
+                onTap: () {},
+                trailing: IconButton(
+                  onPressed: () => _deleteNote(notes[index].id),
+                  icon: const Icon(Icons.delete),
+                ),
+              ),
             );
           },
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CreateNote(
+              client: client,
+              // client: client,
+            ),
+          ),
+        ),
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ),

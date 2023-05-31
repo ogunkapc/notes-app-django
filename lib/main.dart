@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:notes_app/create.dart';
 import 'package:notes_app/note.dart';
+import 'package:notes_app/update.dart';
 import 'package:notes_app/urls.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -83,7 +84,18 @@ class _MyHomePageState extends State<MyHomePage> {
             return Card(
               child: ListTile(
                 title: Text(notes[index].note),
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => UpdateNote(
+                        client: client,
+                        id: notes[index].id,
+                        note: notes[index].note,
+                      ),
+                    ),
+                  );
+                },
                 trailing: IconButton(
                   onPressed: () => _deleteNote(notes[index].id),
                   icon: const Icon(Icons.delete),
@@ -99,7 +111,6 @@ class _MyHomePageState extends State<MyHomePage> {
           MaterialPageRoute(
             builder: (context) => CreateNote(
               client: client,
-              // client: client,
             ),
           ),
         ),
